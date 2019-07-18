@@ -53,12 +53,12 @@ def get_time_delay(ts1, ts2, array1, array2):
         delay = delay_resizer(array1, array2)
 
     elif ts1 > ts2:
-        array1 = np.append(np.zeros(ts1 - ts2), array1)
         delay = delay_resizer(array1, array2)
+        delay -= ts1 - ts2
 
     elif ts1 < ts2:
-        array2 = np.append(np.zeros(ts2 - ts1), array2)
         delay = delay_resizer(array1, array2)
+        delay += ts2 - ts1
 
     return delay
 
@@ -96,9 +96,9 @@ if __name__ == "__main__":
     # plt.plot(cf)
     # # plt.axhline(3*np.std(seque_imps) + np.median(seque_imps))
     # plt.show()
-    ts1, ts2 = 100, 10
+    ts1, ts2 = 45, 30
     for i in range(-2, 2):
-        moon_pulse = seque_imps_pl_noise[ts1:-800]
+        moon_pulse = seque_imps_pl_noise[ts1:-8]
         swich_moon_pulse = np.roll(seque_imps_pl_noise, i)[ts2:-122]
         # cf = get_time_delay(swich_moon_pulse, moon_pulse)
         cf = get_time_delay(ts1, ts2, moon_pulse, swich_moon_pulse)
