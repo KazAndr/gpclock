@@ -73,6 +73,17 @@ def get_time_delay(ts1, ts2, array1, array2, tay):
 
     return delay*tay
 
+def get_TB_sec(file, MJD):
+    MJD = str(MJD)
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    tim = [line.split() for line in lines if len(line.split()) == 7]
+    tim_array = np.asarray(tim).T
+    idx = np.where(tim_array[2] == MJD)
+
+    return float(tim_array[5][idx].item())
+
 if __name__ == "__main__":
     FILES = sorted(glob.glob('data4test/AP/*'))
     FILES_IMP = sorted(glob.glob('data4test/PULSES/*'))
