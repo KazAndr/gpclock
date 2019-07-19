@@ -56,7 +56,7 @@ def delay_resizer(array1, array2):
 
     return delay
 
-def get_time_delay(ts1, ts2, array1, array2):
+def get_time_delay(ts1, ts2, array1, array2, tay):
     """
     Description: return corfunction as result
     """
@@ -71,7 +71,7 @@ def get_time_delay(ts1, ts2, array1, array2):
         delay = delay_resizer(array1, array2)
         delay += ts2 - ts1
 
-    return delay
+    return delay*tay
 
 if __name__ == "__main__":
     FILES = sorted(glob.glob('data4test/AP/*'))
