@@ -12,6 +12,7 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 
+from numpy.fft import fft, ifft, fft2, ifft2, fftshift
 
 def read_header(filename):
     """
@@ -25,27 +26,37 @@ def read_header(filename):
             header[key] = value
     return header
 
+def cross_correlation_using_fft(x, y):
+    f1 = fft(x)
+    f2 = fft(np.flipud(y))
+    cc = np.real(ifft(f1 * f2))
+    return fftshift(cc)
+
+# shift &lt; 0 means that y starts 'shift' time steps before x # shift &gt; 0 means that y starts 'shift' time steps after x
+def compute_shift(x, y):
+    assert len(x) == len(y)
+    c = cross_correlation_using_fft(x, y)
+    assert len(c) == len(x)
+    zero_index = int(len(x) / 2) - 1
+    shift = zero_index - np.argmax(c)
+    return shift
+
 def delay_resizer(array1, array2):
     """docstring for delay_resizer"""
     if len(array1) == len(array2):
-        cf = np.correlate(array1, array2, 'full')
-        delay = ((len(cf)-1)/2)-np.argmax(cf)
+        delay = compute_shift(array1, array2)
 
     elif len(array1) > len(array2):
         array2 = np.append(array2, np.zeros(len(array1) - len(array2)))
-        cf = np.correlate(array1, array2, 'full')
-        # delay = (l_frame, r_frame)
-        delay = ((len(cf)-1)/2)-np.argmax(cf)
+        delay = compute_shift(array1, array2)
 
     elif len(array1) < len(array2):
         array1 = np.append(array1, np.zeros(len(array2) - len(array1)))
-        cf = np.correlate(array2, array1, 'full')
-        delay = -(((len(cf)-1)/2)-np.argmax(cf))
+        delay = compute_shift(array1, array2)
+
     return delay
 
-
 def get_time_delay(ts1, ts2, array1, array2):
-
     """
     Description: return corfunction as result
     """
@@ -96,10 +107,10 @@ if __name__ == "__main__":
     # plt.plot(cf)
     # # plt.axhline(3*np.std(seque_imps) + np.median(seque_imps))
     # plt.show()
-    ts1, ts2 = 45, 30
-    for i in range(-2, 2):
+    ts1, ts2 = 0, 30
+    for i in range(400, 10000):
         moon_pulse = seque_imps_pl_noise[ts1:-8]
-        swich_moon_pulse = np.roll(seque_imps_pl_noise, i)[ts2:-122]
+        swich_moon_pulse = np.roll(seque_imps_pl_noise, i)[ts2:-1225]
         # cf = get_time_delay(swich_moon_pulse, moon_pulse)
         cf = get_time_delay(ts1, ts2, moon_pulse, swich_moon_pulse)
         print(i, cf)
