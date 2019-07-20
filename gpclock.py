@@ -253,16 +253,19 @@ def get_time_delay(ts1, ts2, array1, array2, tay):
 
     if ts1 == ts2:
         delay = delay_resizer(array1, array2)
+        delay *= tay
 
     elif ts1 > ts2:
         delay = delay_resizer(array1, array2)
+        delay *= tay
         delay -= ts1 - ts2
 
     elif ts1 < ts2:
         delay = delay_resizer(array1, array2)
+        delay *= tay
         delay += ts2 - ts1
 
-    return delay*tay
+    return delay
 
 
 def get_TB_sec(filename, MJD):
