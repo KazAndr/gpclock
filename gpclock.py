@@ -60,6 +60,16 @@ def read_header(filename):
     return header
 
 
+def read_prf(filename):
+
+    header = read_header(filename)
+    observs = np.genfromtxt(filename, skip_header=14).T
+    time_point = observs[0]
+    intens_point = observs[1]
+
+    return header, time_point, intens_point
+
+
 def cross_correlation_using_fft(x, y):
     """
     Help on function cross_correlation_using_fft in module gpclock:
