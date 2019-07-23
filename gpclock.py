@@ -35,9 +35,9 @@ def read_header(filename):
     Returns
     -------
     header : dict
-            Dictionary with header information, such as name of pulsar,
-            resolution, numbers of points in the observation,
-            time of start of the observation and other.
+        Dictionary with header information, such as name of pulsar,
+        resolution, numbers of points in the observation,
+        time of start of the observation and other.
 
     Examples
     --------
@@ -61,6 +61,48 @@ def read_header(filename):
 
 
 def read_prf(filename):
+    """
+    Help on function read_prf in module gpclock:
+
+    read_prf(filename):
+        return header, time_point, intens_point
+
+    Discription
+    ----------
+    The function returns header information, time array and flux array form
+    file of observations.
+
+    Parameters
+    ----------
+    filename : str
+        Input data. Name of file in current directory or path to file.
+
+    Returns
+    -------
+    header : dict
+        See documentation for read_header function.
+
+    time_point : numpy.ndarray
+        Array of time points from file of observations.
+
+    intens_point : numpy.ndarray
+        Array of values of intensity from file of observations.
+    Examples
+    --------
+    >> head, t_point, i_point = read_prf('data4test/AP/010117_1133+16_00.prf')
+    >> print(head)
+
+    {'frequency': '112.084', 'utctime': '2:19:20.921382', 'rtype': 'DPP1',
+    'telcode': 'bsa1', 'obscode': 'PO', 'tau': '1.2288',
+    'time': '5:19:20.92138', 'psrname': '1133+16', 'N used channels': '450',
+    'date': '1/1/2017', 'period': '1.18780828035'}
+
+    >> print(len(t_point))
+    570
+
+    >> print(len(i_point))
+    570
+    """
 
     header = read_header(filename)
     observs = np.genfromtxt(filename, skip_header=14).T
