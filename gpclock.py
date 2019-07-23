@@ -361,6 +361,48 @@ def get_TB_sec(filename, MJD):
 
     return float(tim_array[5][idx].item())
 
+
+def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
+
+    header_1, points_1, flux_1 = read_prf(file_obs_1)
+    header_2, points_2, flux_2 = read_prf(file_obs_2)
+
+    day_1, month_1, year_1 = header_1['date'].split('/')
+    hour_1, minute_1, second_1 = header_1['time'].split(':')
+    second_1, microsecond_1 = second_1.split('.')
+    time_start_1 = datetime(
+        int(year_1),
+        int(month_1),
+        int(day_1),
+        int(hour_1),
+        int(minute_1),
+        int(second_1),
+        int(microsecond_1))
+    time_start_1 -= dt.timedelta(hours=3) # to UTC time
+    fs_p_1, _ = str(time_start_1.to_mjd()).split('.')
+
+    day_2, month_2, year_2 = header_2['date'].split('/')
+    hour_2, minute_2, second_2 = header_2['time'].split(':')
+    second_2, microsecond_2 = second_2.split('.')
+    time_start_2 = datetime(
+        int(year_2),
+        int(month_2),
+        int(day_2),
+        int(hour_2),
+        int(minute_2),
+        int(second_2),
+        int(microsecond_2))
+    time_start_2 -= dt.timedelta(hours=3) # to UTC time
+    fs_p_2, _ = str(time_start_2.to_mjd()).split('.')
+
+    tay = np.float64(header_1['tau'])/1000.
+
+    ts_1 = get_TB_sec(file_out_1, fs_p_1)
+    ts_2 = get_TB_sec(file_out_2, fs_p_2)
+
+    return get_time_delay(ts_1, ts_2, flux_1, flux_2, tay)
+
+
 if __name__ == "__main__":
     FILES = sorted(glob.glob('data4test/AP/*'))
     FILES_IMP = sorted(glob.glob('data4test/PULSES/*'))
