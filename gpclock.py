@@ -6,13 +6,13 @@ Created on Wed Jul  3 12:08:56 2019
 
 @author: Kazantsev Andrey, kaz.prao@bk.ru
 """
-# import os
-# import sys
-import glob
-import numpy as np
-import matplotlib.pyplot as plt
 
-from numpy.fft import fft, ifft, fft2, ifft2, fftshift
+import numpy as np
+
+from numpy.fft import fft, ifft, fftshift
+
+from jdutil import *
+
 
 def read_header(filename):
     """
@@ -364,8 +364,8 @@ def get_TB_sec(filename, MJD):
 
 def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
 
-    header_1, points_1, flux_1 = read_prf(file_obs_1)
-    header_2, points_2, flux_2 = read_prf(file_obs_2)
+    header_1, _, flux_1 = read_prf(file_obs_1)
+    header_2, _, flux_2 = read_prf(file_obs_2)
 
     day_1, month_1, year_1 = header_1['date'].split('/')
     hour_1, minute_1, second_1 = header_1['time'].split(':')
@@ -378,7 +378,7 @@ def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
         int(minute_1),
         int(second_1),
         int(microsecond_1))
-    time_start_1 -= dt.timedelta(hours=3) # to UTC time
+    time_start_1 -= dt.timedelta(hours=3)  # to UTC time
     fs_p_1, _ = str(time_start_1.to_mjd()).split('.')
 
     day_2, month_2, year_2 = header_2['date'].split('/')
@@ -392,7 +392,7 @@ def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
         int(minute_2),
         int(second_2),
         int(microsecond_2))
-    time_start_2 -= dt.timedelta(hours=3) # to UTC time
+    time_start_2 -= dt.timedelta(hours=3)  # to UTC time
     fs_p_2, _ = str(time_start_2.to_mjd()).split('.')
 
     tay = np.float64(header_1['tau'])/1000.
@@ -401,51 +401,3 @@ def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
     ts_2 = get_TB_sec(file_out_2, fs_p_2)
 
     return get_time_delay(ts_1, ts_2, flux_1, flux_2, tay)
-
-
-if __name__ == "__main__":
-    FILES = sorted(glob.glob('data4test/AP/*'))
-    FILES_IMP = sorted(glob.glob('data4test/PULSES/*'))
-
-    # print(read_header(FILES[0]))
-    prf = np.genfromtxt(FILES[0], skip_header=14).T
-    prfimps = np.genfromtxt(FILES_IMP[0], skip_header=14).T
-
-    seque_imps = np.hstack(prfimps[1:])
-
-    # plt.close()
-    # plt.plot(seque_imps)
-    # plt.axhline(3*np.std(seque_imps) + np.median(seque_imps))
-    # plt.show()
-
-    need_points = 10000
-    start_noise = np.random.normal(
-        np.mean(seque_imps),
-        np.std(seque_imps),
-        need_points)
-
-    end_noise = np.random.normal(
-        np.mean(seque_imps),
-        np.std(seque_imps),
-        need_points)
-
-    seque_imps_pl_noise = np.hstack([start_noise, seque_imps, end_noise])
-
-
-    # plt.close()
-    # plt.title(np.argmax(cf))
-    # plt.plot(cf)
-    # # plt.axhline(3*np.std(seque_imps) + np.median(seque_imps))
-    # plt.show()
-    ts1, ts2 = 0, 30
-    for i in range(400, 10000):
-        moon_pulse = seque_imps_pl_noise[ts1:-8]
-        swich_moon_pulse = np.roll(seque_imps_pl_noise, i)[ts2:-1225]
-        # cf = get_time_delay(swich_moon_pulse, moon_pulse)
-        cf = get_time_delay(ts1, ts2, moon_pulse, swich_moon_pulse)
-        print(i, cf)
-    # plt.close()
-    # plt.plot(moon_pulse)
-    # plt.plot(swich_moon_pulse)
-    # plt.xlim(7500, 17500)
-    # plt.show()
