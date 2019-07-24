@@ -362,7 +362,7 @@ def get_TB_sec(filename, MJD):
     return float(tim_array[5][idx].item())
 
 
-def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
+def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2, tz1=3, tz2=3):
     """
     Help on function get_time_delay_full in module gpclock:
 
@@ -390,6 +390,12 @@ def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
         Input data. Name of file of baricentric times start in current directory
         or path to the file.
 
+    tz1 : int
+        Input data. Time zone for first recorder. 3 by default.
+
+    tz2 : int
+        Input data. Time zone for second recorder. 3 by default.
+
     Returns
     -------
     delay : numpy.float64
@@ -413,7 +419,7 @@ def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
         int(minute_1),
         int(second_1),
         int(microsecond_1))
-    time_start_1 -= dt.timedelta(hours=3)  # to UTC time
+    time_start_1 -= dt.timedelta(hours=tz1)  # to UTC time
     fs_p_1, _ = str(time_start_1.to_mjd()).split('.')
 
     day_2, month_2, year_2 = header_2['date'].split('/')
@@ -427,7 +433,7 @@ def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
         int(minute_2),
         int(second_2),
         int(microsecond_2))
-    time_start_2 -= dt.timedelta(hours=3)  # to UTC time
+    time_start_2 -= dt.timedelta(hours=tz2)  # to UTC time
     fs_p_2, _ = str(time_start_2.to_mjd()).split('.')
 
     tay = np.float64(header_1['tau'])/1000.
