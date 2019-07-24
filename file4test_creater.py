@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from jdutil import *
-from gpclock import read_header
+from gpclock import read_header, get_time_delay
 
 def wright_file(head, fName, array):
     """docstring for wright_file"""
@@ -53,12 +53,13 @@ shift_list = []
 cut_1_list = []
 cut_2_list = []
 dt_start_list = []
+results_shift = []
 
 for name in FILES_IMP:
     shift = np.random.randint(-1000, 3000)
     cut_1 = np.random.randint(-1000, 0)
     cut_2 = np.random.randint(-1000, 0)
-    dt_start = np.random.randint(-1000, 1000)
+    dt_start = np.random.randint(0, 1000)
 
     shift_list.append(shift)
     cut_1_list.append(cut_1)
@@ -104,19 +105,25 @@ for name in FILES_IMP:
     seque_imps_pl_noise_2 = np.hstack([start_noise, part_gp, end_noise])
     seque_imps_pl_noise_2 = np.roll(seque_imps_pl_noise_2, shift)
     seque_imps_pl_noise_2 = seque_imps_pl_noise_2[:cut_2]
+
+    
+
     # !!! Две строки, три столбца.
     # !!! Текущая ячейка - 1
     plt.close()
     plt.subplot(2, 1, 1)
     plt.plot(seque_imps_pl_noise_1)
-    plt.title("Earth pulse " + "Cut: " + str(cut_1))
-
+    plt.title("Earth pulse " + "Cut: " + str(cut_1) + " points")
+    plt.ylabel("Intensity, arb.u.")
+    plt.xlabel("Number of points, dt = " + header['tau'])
     # !!! Две строки, три столбца.
     # !!! Текущая ячейка - 2
     plt.subplot(2, 1, 2)
     plt.plot(seque_imps_pl_noise_2)
-    plt.title("Moon pulse " + "Shift: " + str(shift) + ' Cut: ' + str(cut_2))
-
+    plt.title("Moon pulse " + "Shift: " + str(shift) + 'points, Cut: ' + str(cut_2) + " points")
+    plt.ylabel("Intensity, arb.u.")
+    plt.xlabel("Number of points, dt = " + header['tau'])
+    
     plt.tight_layout()
 
     plt.savefig('./out_plots/'
@@ -124,7 +131,7 @@ for name in FILES_IMP:
                 + '_'
                 + header['psrname']
                 + '.png',
-                format='png')
+                format='png', dpi=150)
 
     day, month, year = header['date'].split('/')
     hour, minute, second = header['time'].split(':')
@@ -143,7 +150,8 @@ for name in FILES_IMP:
     else:
         seque_imps_pl_noise_1 = seque_imps_pl_noise_1[abs(dt_start):]
 
-
+    results_shift.append(get_time_delay(0,0, seque_imps_pl_noise_1, seque_imps_pl_noise_2, 1))
+    
     fName = './final_test' + os.sep + os.path.basename(name)[:-4] + '_earth.csv'
     wright_file(header, fName, seque_imps_pl_noise_1)
 
@@ -165,10 +173,10 @@ for name in FILES_IMP:
     wright_file(header, fName, seque_imps_pl_noise_2)
 
 fName = '.' + os.sep + 'shift.csv'
-head_file = '#SHIFT   CUT1   CUT2   DT_START'
+head_file = '#SHIFT   CUT1   CUT2   DT_START   RES_SHIFT'
 np.savetxt(fName,
-           np.c_[shift_list, cut_1_list, cut_2_list, dt_start_list],
-           fmt='%i\t%i\t%i\t%i',
+           np.c_[shift_list, cut_1_list, cut_2_list, dt_start_list, results_shift],
+           fmt='%i\t%i\t%i\t%i\t%i',
            delimiter='\t',
            newline='\n',
            header=head_file,
