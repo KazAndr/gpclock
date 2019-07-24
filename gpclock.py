@@ -286,7 +286,7 @@ def get_time_delay(ts1, ts2, array1, array2, tay):
 
     Returns
     -------
-    delay : numpy.int64
+    delay : numpy.float64
             Time delay between two arrays.
 
     Examples
@@ -317,7 +317,7 @@ def get_time_delay(ts1, ts2, array1, array2, tay):
         delay *= tay
         delay += ts2 - ts1
 
-    return delay
+    return np.round(delay, 8)
 
 
 def get_TB_sec(filename, MJD):
@@ -363,6 +363,41 @@ def get_TB_sec(filename, MJD):
 
 
 def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
+    """
+    Help on function get_time_delay_full in module gpclock:
+
+    get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
+        return delay
+
+    Discription
+    ----------
+
+    Parameters
+    ----------
+    file_obs_1 : str
+        Input data. Name of file of observation in current directory
+        or path to the file.
+
+    file_obs_2 : str
+        Input data. Name of file of observation in current directory
+        or path to the file.
+
+    file_out_1 : str
+        Input data. Name of file of baricentric times start in current directory
+        or path to the file.
+
+    file_out_2 : str
+        Input data. Name of file of baricentric times start in current directory
+        or path to the file.
+
+    Returns
+    -------
+    delay : numpy.float64
+            Time delay between two arrays.
+
+    Examples
+    --------
+    """
 
     header_1, _, flux_1 = read_prf(file_obs_1)
     header_2, _, flux_2 = read_prf(file_obs_2)
