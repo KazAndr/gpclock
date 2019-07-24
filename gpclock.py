@@ -342,8 +342,10 @@ def get_TB_sec(filename, MJD):
 
     Returns
     -------
-    TB_sec : nump:y.int64
-            Time delay between two arrays.
+    TB_sec : numpy.float64
+            The moment of start the recording of a given pulsar in
+            the barycentric time recalculated to the barycenter
+            of the solar system for a given Julian date
 
     Examples
     --------
