@@ -21,20 +21,14 @@ moon_list = sorted(glob.glob('./final_test/*moon.csv'))
 
 def save_tim(file, time_array):
     with open(file, 'w') as f:
-        f.write('--------------------------------------------------------------------------\n')
-        f.write('pulsar TEST PULSAR\n')
-        f.write('    Date   JD-2400000.5    UTC[sec]    Err[mcs]    TB[sec]      Res[mcs ]\n')
-        f.write('__________________________________________________________________________\n')
         for idx, value in enumerate(time_array):
-            f.write(str(idx + 1) + ')' + '\t')
-            f.write(str(value.year) + '/' + str(value.month) + '/' + str(value.day) + '\t' )
             fs_p, sc_p = str(value.to_mjd()).split('.')
             sec = str(float( '0.' + sc_p)*24*60*60)
             f.write(fs_p + '\t')
             f.write(sec + '\t')
-            f.write('.85' + '\t')
+            f.write('0.0' + '\t')
             f.write(sec + '\t')
-            f.write('2555.85' + '\n')
+            f.write('0.0' + '\n')
         
     return None
 
