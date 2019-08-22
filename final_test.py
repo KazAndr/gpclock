@@ -23,7 +23,7 @@ def save_tim(file, time_array):
     with open(file, 'w') as f:
         for idx, value in enumerate(time_array):
             fs_p, sc_p = str(value.to_mjd()).split('.')
-            sec = str(round(float( '0.' + sc_p)*24*60*60), 10**8)
+            sec = str(round(float( '0.' + sc_p)*24*60*60, 8))
             f.write(fs_p + '\t')
             f.write(sec + '\t')
             f.write('0.0' + '\t')
