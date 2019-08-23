@@ -15,8 +15,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from jdutil import *
-from gpclock import read_header, get_time_delay
+from gpclock import isot_time, get_isot, read_header, get_time_delay
 
 def wright_file(head, fName, array):
     """docstring for wright_file"""
@@ -106,7 +105,7 @@ for name in FILES_IMP:
     seque_imps_pl_noise_2 = np.roll(seque_imps_pl_noise_2, shift)
     seque_imps_pl_noise_2 = seque_imps_pl_noise_2[:cut_2]
 
-    
+
 
     # !!! Две строки, три столбца.
     # !!! Текущая ячейка - 1
@@ -123,7 +122,7 @@ for name in FILES_IMP:
     plt.title("Moon pulse " + "Shift: " + str(shift) + 'points, Cut: ' + str(cut_2) + " points")
     plt.ylabel("Intensity, arb.u.")
     plt.xlabel("Number of points, dt = " + header['tau'])
-    
+
     plt.tight_layout()
 
     plt.savefig('./out_plots/'
@@ -133,41 +132,39 @@ for name in FILES_IMP:
                 + '.png',
                 format='png', dpi=150)
 
-    day, month, year = header['date'].split('/')
-    hour, minute, second = header['time'].split(':')
-    second, microsecond = second.split('.')
-    time_start = dt.datetime(
-        int(year),
-        int(month),
-        int(day),
-        int(hour),
-        int(minute),
-        int(second),
-        int(microsecond))
+
+    time_start = isot_time(get_isot(header))
 
     if dt_start > 0:
         seque_imps_pl_noise_2 = seque_imps_pl_noise_2[abs(dt_start):]
     else:
         seque_imps_pl_noise_1 = seque_imps_pl_noise_1[abs(dt_start):]
 
-    results_shift.append(get_time_delay(0,0, seque_imps_pl_noise_1, seque_imps_pl_noise_2, 1))
-    
+    results_shift.append(get_time_delay(0,0,
+                                        seque_imps_pl_noise_1,
+                                        seque_imps_pl_noise_2, 1))
+
     fName = './final_test' + os.sep + os.path.basename(name)[:-4] + '_earth.csv'
     wright_file(header, fName, seque_imps_pl_noise_1)
 
 
     dt_s, dt_ms = str(round(dt_start * float(header['tau'])/1000, 6)).split('.')
-    time_start_shift = dt.timedelta(seconds=int(dt_s), microseconds=int(dt_ms))
 
-    shifted_time = time_start + time_start_shift
+    shifted_time = str(
+        np.datetime64(time_1)
+        + np.timedelta64(dt_s, 's')
+        + np.timedelta64(dt_ms + '00', 'us')
+    )
+
+    shifted_time = isot_time(shifted_time)
+
     header['date'] = (str(shifted_time.day) + '/'
                       + str(shifted_time.month) + '/'
                       + str(shifted_time.year))
 
     header['time'] = (str(shifted_time.hour) + ':'
-                      + str(shifted_time.minute) + ':'
-                      + str(shifted_time.second) + '.'
-                      + str(shifted_time.microsecond))
+                      + str(shifted_time.minutes) + ':'
+                      + str(shifted_time.seconds))
 
     fName = './final_test' + os.sep + os.path.basename(name)[:-4] + '_moon.csv'
     wright_file(header, fName, seque_imps_pl_noise_2)
