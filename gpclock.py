@@ -13,6 +13,110 @@ from numpy.fft import fft, ifft, fftshift
 
 from jdutil import *
 
+class isot_time(object):
+    """
+    Descriotion on class isot_time(object) in module gpclock:
+
+    Discription
+    ----------
+    The class allows to effectively work with time and date in frame the module.
+    """
+    def __init__(self, time):
+        """
+        Help on method __init__ in class isot_time in module gpclock:
+
+        Discription
+        ----------
+        The method initializes the class isot_time.
+
+        Parameters
+        ----------
+        time : str
+            Input data. Time for initialization in isot format
+            (YYYY-MM-DDThh:mm:ss.ssssss).
+
+        Attributes:
+        -------
+        value : str
+            Full value of input parametr 'time'.
+
+        year : str
+            Value of year in 'time'.
+
+        month : str
+            Value of month in 'time'.
+
+        day : str
+            Value of day in 'time'.
+
+        hour : str
+            Value of hour in 'time'.
+
+        minutes : str
+            Value of minutes in 'time'.
+
+        seconds : str
+            Value of seconds in 'time'.
+
+        Examples
+        --------
+        >> t = isot_time('2002-02-03T13:56:03.1722583')
+        >> t.value
+        '2002-02-03T13:56:03.1722583'
+        >> t.year
+        '2002'
+        >> t.minutes
+        '56'
+        >> t.seconds
+        '03.1722583'
+        """
+
+        self.value = time
+        ymd, hms = time.split('T')
+        self.year, self.month, self.day = ymd.split('-')
+        self.hour, self.minutes, self.seconds = hms.split(':')
+
+    def to_mjd(self):
+        """
+        Help on method to_mjd in class isot_time in module gpclock:
+
+        Discription
+        ----------
+            The method converts 'time' to MJD(Modified Julian Date) format
+            by algoritm from (https://en.wikipedia.org/wiki/Julian_day#Variants)
+            and returns value of MJD.
+
+        Parameters
+        ----------
+        The method uses attributes of class(see __init__).
+
+        Returns
+        -------
+        MJD : numpy.float64
+                Value of MJD.
+
+        Examples
+        --------
+        >> t = isot_time('2002-02-03T13:56:03.1722583')
+        >> t.to_mjd()
+        52308.580592271406
+        """
+        year = np.int(self.year)
+        month = np.int(self.month)
+        day = np.int(self.day)
+        hh = np.int(self.hour)
+        mm = np.int(self.minutes)
+        ss = np.float64(self.seconds)
+
+        a=int((14-month)/12)
+        y=year+4800-a
+        m=month+12*a-3
+        JDN=day+int((153*m+2)/5)+int(365*y)+int(y/4)-int(y/100)+int(y/400)-32045
+
+        JD=JDN+((hh-12)/24)+(mm/1440)+(ss/86400)
+
+        return JD - 2400000.5
+
 
 def read_header(filename):
     """
