@@ -151,7 +151,7 @@ for name in FILES_IMP:
     dt_s, dt_ms = str(round(dt_start * float(header['tau'])/1000, 6)).split('.')
 
     shifted_time = str(
-        np.datetime64(time_1)
+        np.datetime64(time_start.value)
         + np.timedelta64(dt_s, 's')
         + np.timedelta64(dt_ms + '00', 'us')
     )
@@ -162,7 +162,7 @@ for name in FILES_IMP:
                       + str(shifted_time.month) + '/'
                       + str(shifted_time.year))
 
-    header['time'] = (str(shifted_time.hour) + ':'
+    header['utctime'] = (str(shifted_time.hour) + ':'
                       + str(shifted_time.minutes) + ':'
                       + str(shifted_time.seconds))
 
