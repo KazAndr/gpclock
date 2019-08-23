@@ -11,8 +11,6 @@ import numpy as np
 
 from numpy.fft import fft, ifft, fftshift
 
-from jdutil import *
-
 class isot_time(object):
     """
     Descriotion on class isot_time(object) in module gpclock:
