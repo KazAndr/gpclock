@@ -457,7 +457,6 @@ def get_time_delay(ts1, ts2, array1, array2, tay):
 
     return np.round(delay, 8)
 
-
 def get_TB_sec(filename, MJD):
     """
     Help on function get_TB_sec in module gpclock:
@@ -475,8 +474,9 @@ def get_TB_sec(filename, MJD):
     filename : str
         Input data. Name of file in current directory or path to file.
 
-    MJD : int, str
+    MJD : float
         Input data. Modified Julian Date of time stast of observation.
+        Fifth digit after point.
 
     Returns
     -------
@@ -487,20 +487,19 @@ def get_TB_sec(filename, MJD):
 
     Examples
     --------
-    >> get_TB_sec('data4test/_tim.out', 46436)
-    58982.2204971
+    >> get_TB_sec('data4test/_tim.out', 50856.318472)
+    27275.56058022
     """
+    tim_array = np.genfromtxt(filename, dtype='str').T
 
-    MJD = str(MJD)
-    with open(filename, 'r') as f:
-        lines = f.readlines()
+    mjd_5_sing = [
+        np.round(int(mjd) + np.float64(utsec)/86400, 6)
+        for mjd, utsec in zip(tim_array[0], tim_array[1])
+    ]
 
-    tim = [line.split() for line in lines if len(line.split()) == 7]
-    tim_array = np.asarray(tim).T
-    idx = np.where(tim_array[2] == MJD)
+    idx = np.where(mjd_5_sing[0] == MJD)
 
-    return float(tim_array[5][idx].item())
-
+    return float(tim_array[3][idx].item())
 
 def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2, tz1=3, tz2=3):
     """
