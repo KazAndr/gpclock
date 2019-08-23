@@ -505,7 +505,7 @@ def get_TB_sec(filename, MJD):
         for mjd, utsec in zip(tim_array[0], tim_array[1])
     ]
 
-    idx = np.where(mjd_5_sing[0] == MJD)
+    idx = np.where(mjd_5_sing == MJD)
 
     return float(tim_array[3][idx].item())
 
