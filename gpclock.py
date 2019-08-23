@@ -11,6 +11,7 @@ import numpy as np
 
 from numpy.fft import fft, ifft, fftshift
 
+
 class isot_time(object):
     """
     Descriotion on class isot_time(object) in module gpclock:
@@ -64,8 +65,8 @@ class isot_time(object):
         >> t.year
         '2002'
         >> t.minutes
-        '56'
         >> t.seconds
+        '56'
         '03.1722583'
         """
 
@@ -106,14 +107,49 @@ class isot_time(object):
         mm = np.int(self.minutes)
         ss = np.float64(self.seconds)
 
-        a=int((14-month)/12)
-        y=year+4800-a
-        m=month+12*a-3
-        JDN=day+int((153*m+2)/5)+int(365*y)+int(y/4)-int(y/100)+int(y/400)-32045
+        a = int((14-month)/12)
+        y = year+4800-a
+        m = month+12*a-3
+        JDN = (day+int((153*m+2)/5)+int(365*y)+int(y/4)-int(y/100)+int(y/400)
+               - 32045)
 
-        JD=JDN+((hh-12)/24)+(mm/1440)+(ss/86400)
+        JD = JDN+((hh-12)/24)+(mm/1440)+(ss/86400)
 
         return JD - 2400000.5
+
+
+def get_isot(header):
+    """
+    Help on function get_isot in module gpclock:
+
+    Discription
+    ----------
+    The functions returns date and time from header information of files
+    in isot format(YYYY-MM-DDThh:mm:ss.ssssss).
+
+    Parameters
+    ----------
+    header : dict
+        Dictionary with header information, such as name of pulsar,
+        resolution, numbers of points in the observation,
+        time of start of the observation and other.
+
+    Returns:
+    -------
+    time_isot : str
+        Date and time from header information
+        in isot format(YYYY-MM-DDThh:mm:ss.ssssss).
+
+    Examples
+    --------
+    >> head = read_header('data4test/PULSES/compPulses_010117_1133+16_00.prf')
+    >> get_isot(head)
+    '2017-1-1T2:19:20.921382'
+    """
+    day, month, year = header['date'].split('/')
+    hh, mm, ss = header['utctime'].split(':')
+
+    return '{}-{}-{}T{}:{}:{}'.format(year, month, day, hh, mm, ss)
 
 
 def read_header(filename):
