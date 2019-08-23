@@ -149,7 +149,12 @@ def get_isot(header):
     day, month, year = header['date'].split('/')
     hh, mm, ss = header['utctime'].split(':')
 
-    return '{}-{}-{}T{}:{}:{}'.format(year, month, day, hh, mm, ss)
+    return '{}-{:02d}-{:02d}T{:02d}:{}:{}'.format(year,
+                                                  int(month),
+                                                  int(day),
+                                                  int(hh),
+                                                  mm,
+                                                  ss)
 
 
 def read_header(filename):
@@ -162,7 +167,7 @@ def read_header(filename):
     Discription
     ----------
     The function reads 10 rows as a header information from file "filename".
-    The function gets a name of file or path to file as input data
+   The function gets a name of file or path to file as input data
     and return header information.
 
     Parameters
