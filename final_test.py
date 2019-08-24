@@ -32,6 +32,21 @@ def save_tim(file, time_array):
 
     return None
 
+def save_tim_moon(file, time_array, file_shift, tay):
+    shift_file = np.genfromtxt(file_shift).T
+    with open(file, 'w') as f:
+        for idx, value in enumerate(time_array):
+            fs_p, sc_p = str(value.to_mjd()).split('.')
+            sec = str(round(float( '0.' + sc_p)*24*60*60, 15) + shift_file[3][idx]*tay)
+            f.write(fs_p + '\t')
+            f.write(sec + '\t')
+            f.write('0.0' + '\t')
+            f.write(sec + '\t')
+            f.write('0.0' + '\n')
+
+    return None
+
+
 time_list_earth = []
 time_list_moon = []
 
@@ -52,7 +67,7 @@ for i, _ in enumerate(moon_list):
     time_list_moon.append(time_start_moon)
 
 save_tim('./earth.out', time_list_earth)
-save_tim('./moon.out', time_list_moon)
+save_tim_moon('./moon.out', time_list_earth, './shift.csv', 1.2288/1000)
 
 for i, _ in enumerate(earth_list):
     header = read_header(earth_list[i])
