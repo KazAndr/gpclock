@@ -475,7 +475,8 @@ def get_TB_sec(filename, MJD):
 
     Discription
     ----------
-        Function returns number of seconds in
+        Function returns number of seconds in Barycentric Dynamical Time (TDB)
+        (comes from file 'filename').
         Example of tim file can be find in data4test.
 
     Parameters
@@ -485,7 +486,7 @@ def get_TB_sec(filename, MJD):
 
     MJD : float
         Input data. Modified Julian Date of time stast of observation.
-        Fifth digit after point.
+        Six digit after point.
 
     Returns
     -------
@@ -510,15 +511,60 @@ def get_TB_sec(filename, MJD):
 
     return float(tim_array[3][idx].item())
 
-def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2, tz1=3, tz2=3):
-    """
-    Help on function get_time_delay_full in module gpclock:
 
-    get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2):
+def get_TB_sec_array(array, MJD):
+    """
+    Help on function get_TB_sec_array in module gpclock:
+
+    get_TB_sec_array(array, MJD):
+        return TB_sec
+
+    Discription
+    ----------
+        Function returns number of seconds in Barycentric Dynamical Time (TDB)
+        (comes from 3D array 'array').
+
+    Parameters
+    ----------
+    array : 2-D list, 2-D array, numpy.ndarray 
+        Input data. 2-D array with time start and TDB of observation.
+
+    MJD : float
+        Input data. Modified Julian Date of time stast of observation.
+        Six digit after point.
+
+    Returns
+    -------
+    TB_sec : numpy.float64
+            The moment of start the recording of a given pulsar in
+            the barycentric time recalculated to the barycenter
+            of the solar system for a given Julian date
+
+    Examples
+    --------
+    """
+    mjd_5_sing = [
+        np.round(int(mjd) + np.float64(utsec)/86400, 6)
+        for mjd, utsec in zip(array[0], array[1])
+    ]
+    idx = np.where(np.asarray(mjd_5_sing) == MJD)
+
+    return float(array[2][idx].item())
+
+
+def get_time_delay_file(file_obs_1, file_obs_2, file_out_1, file_out_2):
+    """
+    Help on function get_time_delay_file in module gpclock:
+
+    get_time_delay_file(file_obs_1, file_obs_2, file_out_1, file_out_2):
         return delay
 
     Discription
     ----------
+    Function calculates time delay between two different size array
+    (comes from files of observations: file_obs_1, file_obs_2),
+    witch were recorded with different time start
+    (comes from files of Barycentric Dynamical Time (TDB): file_out_1, file_out_2).
 
     Parameters
     ----------
@@ -538,11 +584,61 @@ def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2, tz1=3, t
         Input data. Name of file of baricentric times start in current directory
         or path to the file.
 
-    tz1 : int
-        Input data. Time zone for first recorder. 3 by default.
+    Returns
+    -------
+    delay : numpy.float64
+            Time delay between two arrays.
 
-    tz2 : int
-        Input data. Time zone for second recorder. 3 by default.
+    Examples
+    --------
+    """
+
+    header_1, _, flux_1 = read_prf(file_obs_1)
+    header_2, _, flux_2 = read_prf(file_obs_2)
+
+    time_start_1 = isot_time(get_isot(header_1))
+    fs_p_1 = np.round(time_start_1.to_mjd(), 6)
+
+    time_start_2 = isot_time(get_isot(header_2))
+    fs_p_2 = np.round(time_start_2.to_mjd(), 6)
+
+    tay = np.float64(header_1['tau'])/1000.
+
+    ts_1 = get_TB_sec(file_out_1, fs_p_1)
+    ts_2 = get_TB_sec(file_out_2, fs_p_2)
+
+    return get_time_delay(ts_1, ts_2, flux_1, flux_2, tay)
+
+
+def get_time_delay_array(file_obs_1, file_obs_2, array_out_1, array_out_2):
+    """
+    Help on function get_time_delay_array in module gpclock:
+
+    get_time_delay_array(file_obs_1, file_obs_2, array_out_1, array_out_2):
+        return delay
+
+    Discription
+    ----------
+    Function calculates time delay between two different size array
+    (comes from files of observations: file_obs_1, file_obs_2),
+    witch were recorded with different time start
+    (comes from 2D array of Barycentric Dynamical Time (TDB): array_out_1, array_out_2).
+
+    Parameters
+    ----------
+    file_obs_1 : str
+        Input data. Name of file of observation in current directory
+        or path to the file.
+
+    file_obs_2 : str
+        Input data. Name of file of observation in current directory
+        or path to the file.
+
+    array_out_1 : str
+        Input data. 2D array of Barycentric Dynamical Time (TDB) for first recorder.
+
+    array_out_2 : str
+        Input data. 2D array of Barycentric Dynamical Time (TDB) for second recorder.
 
     Returns
     -------
@@ -556,37 +652,15 @@ def get_time_delay_full(file_obs_1, file_obs_2, file_out_1, file_out_2, tz1=3, t
     header_1, _, flux_1 = read_prf(file_obs_1)
     header_2, _, flux_2 = read_prf(file_obs_2)
 
-    day_1, month_1, year_1 = header_1['date'].split('/')
-    hour_1, minute_1, second_1 = header_1['time'].split(':')
-    second_1, microsecond_1 = second_1.split('.')
-    time_start_1 = datetime(
-        int(year_1),
-        int(month_1),
-        int(day_1),
-        int(hour_1),
-        int(minute_1),
-        int(second_1),
-        int(microsecond_1))
-    time_start_1 -= dt.timedelta(hours=tz1)  # to UTC time
-    fs_p_1, _ = str(time_start_1.to_mjd()).split('.')
+    time_start_1 = isot_time(get_isot(header_1))
+    fs_p_1 = np.round(time_start_1.to_mjd(), 6)
 
-    day_2, month_2, year_2 = header_2['date'].split('/')
-    hour_2, minute_2, second_2 = header_2['time'].split(':')
-    second_2, microsecond_2 = second_2.split('.')
-    time_start_2 = datetime(
-        int(year_2),
-        int(month_2),
-        int(day_2),
-        int(hour_2),
-        int(minute_2),
-        int(second_2),
-        int(microsecond_2))
-    time_start_2 -= dt.timedelta(hours=tz2)  # to UTC time
-    fs_p_2, _ = str(time_start_2.to_mjd()).split('.')
+    time_start_2 = isot_time(get_isot(header_2))
+    fs_p_2 = np.round(time_start_2.to_mjd(), 6)
 
     tay = np.float64(header_1['tau'])/1000.
 
-    ts_1 = get_TB_sec(file_out_1, fs_p_1)
-    ts_2 = get_TB_sec(file_out_2, fs_p_2)
+    ts_1 = get_TB_sec_array(array_out_1, fs_p_1)
+    ts_2 = get_TB_sec_array(array_out_2, fs_p_2)
 
     return get_time_delay(ts_1, ts_2, flux_1, flux_2, tay)
