@@ -148,12 +148,12 @@ for name in FILES_IMP:
     wright_file(header, fName, seque_imps_pl_noise_1)
 
 
-    dt_s, dt_ms = str(round(dt_start * float(header['tau'])/1000, 6)).split('.')
+    dt_s, dt_ms = str(round(dt_start * float(header['tau'])/1000, 9)).split('.')
 
     shifted_time = str(
         np.datetime64(time_start.value)
         + np.timedelta64(dt_s, 's')
-        + np.timedelta64(dt_ms + '00', 'us')
+        + np.timedelta64(dt_ms + '0'*(9-len(dt_ms)), 'ns')
     )
 
     shifted_time = isot_time(shifted_time)

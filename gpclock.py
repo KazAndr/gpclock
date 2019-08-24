@@ -9,6 +9,7 @@ Created on Wed Jul  3 12:08:56 2019
 
 import numpy as np
 
+from decimal import Decimal
 from numpy.fft import fft, ifft, fftshift
 
 
@@ -113,8 +114,8 @@ class isot_time(object):
         JDN = (day+int((153*m+2)/5)+int(365*y)+int(y/4)-int(y/100)+int(y/400)
                - 32045)
 
-        JD = JDN+((hh-12)/24)+(mm/1440)+(ss/86400)
-
+        JD = JDN+(Decimal(hh-12)/Decimal(24))+(Decimal(mm)/Decimal(1440))+(Decimal(ss)/Decimal(86400))
+        JD = np.float64(JD)
         return JD - 2400000.5
 
 
